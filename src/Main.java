@@ -1,38 +1,34 @@
-package src;
+import com.smartresourcemanagement.controller.ResourceManager;
+import com.smartresourcemanagement.controller.TaskScheduler;
+import com.smartresourcemanagement.controller.AutoBackupThread;
+import com.smartresourcemanagement.view.ConsoleUI;
+import com.smartresourcemanagement.view.MainGUI;
 
-import src.controller.ResourceManager;
-import src.controller.TaskScheduler;
-import src.view.MainDashboard;
-import src.util.LoggerUtil;
-
-import javax.swing.*;
-
-/**
- * Entry point for the Smart Resource Management System.
- * It initializes controllers, loads resources, and launches the GUI dashboard.
- */
 public class Main {
 
     public static void main(String[] args) {
 
-        // Initialize system components
-        LoggerUtil.log("Initializing Smart Resource Management System...");
+        // Create global resource manager
+        ResourceManager manager = new ResourceManager();
+        TaskScheduler scheduler = new TaskScheduler();
 
-        ResourceManager resourceManager = new ResourceManager();
-        TaskScheduler taskScheduler = new TaskScheduler();
+        // Start auto backup thread (optional but safe)
+        AutoBackupThread backupThread = new AutoBackupThread(
+            "backup.text",
+            manager.getAllResources(),
+            500000
+        );
+        backupThread.start();
 
-        // Load existing data if available
-        resourceManager.loadResources();
+        // Choose UI mode: console or GUI
+        boolean useGUI = true;  // change to false for console mode
 
-        // Launch GUI on the Event Dispatch Thread
-        SwingUtilities.invokeLater(() -> {
-            try {
-                new MainDashboard(resourceManager, taskScheduler).setVisible(true);
-                LoggerUtil.log("Dashboard launched successfully.");
-            } catch (Exception e) {
-                LoggerUtil.error("Error launching dashboard: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
+        if (useGUI) {
+            MainGUI gui = new MainGUI(manager, scheduler);
+            gui.setVisible(true);
+        } else {
+            ConsoleUI console = new ConsoleUI(manager);
+            console.start();  // run console menu loop
+        }
     }
 }
