@@ -21,7 +21,7 @@ public class Main {
         backupThread.start();
 
         // Choose UI mode: console or GUI
-        boolean useGUI = true;  // change to false for console mode
+        boolean useGUI = false;  // change to false for console mode
 
         if (useGUI) {
             MainGUI gui = new MainGUI(manager, scheduler);
